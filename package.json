@@ -1,6 +1,7 @@
 {
   "name": "new-partner-workspace",
   "private": true,
+  "type": "module",
   "packageManager": "pnpm@11.19.0",
   "scripts": {
     "dev": "concurrently -k -n API,WEB -c green,cyan \"pnpm --filter @new-partner/api dev\" \"pnpm --filter @new-partner/web dev\"",
