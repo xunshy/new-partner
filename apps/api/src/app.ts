@@ -57,8 +57,6 @@ export async function createApp(databasePath?: string) {
     const { rows } = await db.execute({ sql: 'SELECT last_generated FROM sessions WHERE id = ?', args: [owner] });
     if (Date.now() - Number(rows[0]!.last_generated) < 1000) return c.json({ error: '正在补充灵感，请稍等一秒' }, 429);
     const partner = generatePartner(parsed.data);
-    await db.execute({ sql: "DELETE FROM events WHERE partner_id IN (SELECT id FROM partners WHERE owner = ? AND json_extract(data, '$.saved') = 0)", args: [owner] });
-    await db.execute({ sql: "DELETE FROM partners WHERE owner = ? AND json_extract(data, '$.saved') = 0", args: [owner] });
     await db.execute({ sql: 'INSERT INTO partners (id, owner, data) VALUES (?, ?, ?)', args: [partner.id, owner, JSON.stringify(partner)] });
     await db.execute({ sql: 'UPDATE generation_counts SET count = count + 1 WHERE rarity = ?', args: [partner.rarity] });
     await db.execute({ sql: 'UPDATE sessions SET last_generated = ? WHERE id = ?', args: [Date.now(), owner] });
