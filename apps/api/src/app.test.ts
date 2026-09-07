@@ -42,6 +42,7 @@ test('rejects malformed data, unknown actions and cross-origin writes', async ()
     assert.equal((await app.request('/api/partners', { method: 'POST', body: JSON.stringify({ nickname: 'x'.repeat(13) }) })).status, 400);
     assert.equal((await app.request('/api/partners', { method: 'POST', headers: { origin: 'https://unrelated.example' }, body: '{}' })).status, 403);
     assert.equal((await app.request('/api/partners', { method: 'POST', headers: { origin: 'http://127.0.0.1:5173' }, body: '{}' })).status, 201);
+    assert.equal((await app.request('https://internal-deployment.vercel.app/api/partners', { method: 'POST', headers: { origin: 'https://new-partner-api.vercel.app', 'x-forwarded-host': 'new-partner-api.vercel.app', 'x-forwarded-proto': 'https' }, body: '{}' })).status, 201);
     assert.equal((await app.request('/api/partners/anything/interactions', { method: 'POST', body: JSON.stringify({ action: 'hack' }) })).status, 400);
   } finally { db.close(); }
 });

@@ -12,7 +12,11 @@ export async function createApp(databasePath?: string) {
     c.header('Cache-Control', 'no-store');
     if (['POST', 'PATCH', 'DELETE'].includes(c.req.method)) {
       const origin = c.req.header('origin');
-      const expected = process.env.PUBLIC_ORIGIN || (process.env.NODE_ENV === 'production' ? new URL(c.req.url).origin : 'http://127.0.0.1:5173');
+      const forwardedHost = c.req.header('x-forwarded-host');
+      const forwardedProtocol = c.req.header('x-forwarded-proto') || 'https';
+      const expected = process.env.PUBLIC_ORIGIN
+        || (forwardedHost ? `${forwardedProtocol}://${forwardedHost}` : undefined)
+        || (process.env.NODE_ENV === 'production' ? new URL(c.req.url).origin : 'http://127.0.0.1:5173');
       if (origin && origin !== expected) return c.json({ error: '请求来源不匹配' }, 403);
       if (Number(c.req.header('content-length') || 0) > 8192) return c.json({ error: '请求内容过大' }, 413);
     }
