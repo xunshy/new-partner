@@ -1,8 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "ES2022",
-    "moduleResolution": "bundler",
+    "module": "node20",
+    "moduleResolution": "nodenext",
     "outDir": "dist",
     "types": ["node"],
     "target": "ES2022",
@@ -11,5 +11,6 @@
     "noEmit": false,
     "declaration": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/index.ts"]
 }
