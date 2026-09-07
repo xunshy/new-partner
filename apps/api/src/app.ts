@@ -57,9 +57,11 @@ export async function createApp(databasePath?: string) {
     const { rows } = await db.execute({ sql: 'SELECT last_generated FROM sessions WHERE id = ?', args: [owner] });
     if (Date.now() - Number(rows[0]!.last_generated) < 1000) return c.json({ error: '正在补充灵感，请稍等一秒' }, 429);
     const partner = generatePartner(parsed.data);
-    await db.execute({ sql: 'INSERT INTO partners (id, owner, data) VALUES (?, ?, ?)', args: [partner.id, owner, JSON.stringify(partner)] });
-    await db.execute({ sql: 'UPDATE generation_counts SET count = count + 1 WHERE rarity = ?', args: [partner.rarity] });
-    await db.execute({ sql: 'UPDATE sessions SET last_generated = ? WHERE id = ?', args: [Date.now(), owner] });
+    await db.batch([
+      { sql: 'INSERT INTO partners (id, owner, data) VALUES (?, ?, ?)', args: [partner.id, owner, JSON.stringify(partner)] },
+      { sql: 'UPDATE generation_counts SET count = count + 1 WHERE rarity = ?', args: [partner.rarity] },
+      { sql: 'UPDATE sessions SET last_generated = ? WHERE id = ?', args: [Date.now(), owner] },
+    ], 'write');
     return c.json({ partner }, 201);
   });
   app.post('/api/partners/:id/save', async c => {
@@ -101,8 +103,10 @@ export async function createApp(databasePath?: string) {
     const delta = Math.min(generated.delta, 100 - partner.affection);
     const event: PartnerEvent = { id: randomUUID(), partnerId: partner.id, action: parsed.data.action, message: generated.message, delta, createdAt: new Date(now).toISOString() };
     partner.affection += delta;
-    await db.execute({ sql: 'UPDATE partners SET data = ? WHERE id = ?', args: [JSON.stringify(partner), partner.id] });
-    await db.execute({ sql: 'INSERT INTO events (id, partner_id, created_at, data) VALUES (?, ?, ?, ?)', args: [event.id, partner.id, now, JSON.stringify(event)] });
+    await db.batch([
+      { sql: 'UPDATE partners SET data = ? WHERE id = ?', args: [JSON.stringify(partner), partner.id] },
+      { sql: 'INSERT INTO events (id, partner_id, created_at, data) VALUES (?, ?, ?, ?)', args: [event.id, partner.id, now, JSON.stringify(event)] },
+    ], 'write');
     return c.json({ partner, event, nextAllowedAt: new Date(now + COOLDOWN_MS).toISOString() });
   });
   app.notFound(c => c.json({ error: '接口不存在' }, 404));
