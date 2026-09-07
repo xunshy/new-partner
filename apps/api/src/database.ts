@@ -16,9 +16,9 @@ export async function openDatabase(path?: string): Promise<DatabaseClient> {
   if (remote && !remote.startsWith('libsql://') && !remote.startsWith('https://')) throw new Error('Use a persistent remote Turso URL');
   const local = path || process.env.DATABASE_PATH || './data/partners.db';
   if (!remote && local !== ':memory:') mkdirSync(dirname(resolve(local)), { recursive: true });
-  // 远程库只走 HTTP，用 web 入口避开 libsql 的原生二进制——Serverless 打包经常带不上它。
-  const { createClient } = remote ? await import('@libsql/client/web') : await import('@libsql/client');
-  const db = createClient({ url: remote || (local === ':memory:' ? 'file::memory:' : pathToFileURL(resolve(local)).href), ...(remote ? { authToken: process.env.TURSO_AUTH_TOKEN } : {}) });
+  const { createClient } = remote ? await import('@libsql/client/http') : await import('@libsql/client');
+  const remoteHttpUrl = remote?.replace(/^libsql:/, 'https:');
+  const db = createClient({ url: remoteHttpUrl || (local === ':memory:' ? 'file::memory:' : pathToFileURL(resolve(local)).href), ...(remote ? { authToken: process.env.TURSO_AUTH_TOKEN } : {}) });
   await db.batch([
     'CREATE TABLE IF NOT EXISTS sessions (id TEXT PRIMARY KEY, last_generated INTEGER NOT NULL DEFAULT 0)',
     'CREATE TABLE IF NOT EXISTS partners (id TEXT PRIMARY KEY, owner TEXT NOT NULL, data TEXT NOT NULL)',
