@@ -1,5 +1,5 @@
 import { randomInt, randomUUID } from 'node:crypto';
-import { personalities, rarityRates, type CreatePartnerInput, type Partner, type Action } from '@new-partner/shared';
+import { personalities, rarityRates, type CreatePartnerInput, type Partner, type Action } from '../../../packages/shared/src/index.js';
 
 const pick = <T>(items: readonly T[]): T => items[randomInt(items.length)]!;
 const profiles = {

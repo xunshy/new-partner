@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { getCookie, setCookie } from 'hono/cookie';
 import { randomUUID } from 'node:crypto';
-import { COOLDOWN_MS, rarityRates, createPartnerSchema, interactSchema, renameSchema, type Partner, type PartnerEvent } from '@new-partner/shared';
+import { COOLDOWN_MS, rarityRates, createPartnerSchema, interactSchema, renameSchema, type Partner, type PartnerEvent } from '../../../packages/shared/src/index.js';
 import { generateInteraction, generatePartner } from './generator.js';
 import { openDatabase, write, type DatabaseClient, type DatabaseTransaction } from './database.js';
 
