@@ -1,0 +1,21 @@
+{
+  "name": "@new-partner/api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "tsx --test src/app.test.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.19.11",
+    "@libsql/client": "^0.18.0",
+    "@new-partner/shared": "workspace:*",
+    "hono": "^4.12.0",
+    "tsx": "^4.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0"
+  }
+}

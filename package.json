@@ -1,0 +1,13 @@
+{
+  "name": "new-partner-workspace",
+  "private": true,
+  "packageManager": "pnpm@11.19.0",
+  "scripts": {
+    "dev": "concurrently -k -n API,WEB -c green,cyan \"pnpm --filter @new-partner/api dev\" \"pnpm --filter @new-partner/web dev\"",
+    "build": "pnpm --filter @new-partner/web build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm --filter @new-partner/api test"
+  },
+  "dependencies": { "@hono/node-server": "^1.19.11" },
+  "devDependencies": { "concurrently": "^9.2.1", "typescript": "^5.9.3" }
+}
