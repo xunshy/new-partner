@@ -5,7 +5,7 @@
   "packageManager": "pnpm@11.19.0",
   "scripts": {
     "dev": "concurrently -k -n API,WEB -c green,cyan \"pnpm --filter @new-partner/api dev\" \"pnpm --filter @new-partner/web dev\"",
-    "build": "pnpm --filter @new-partner/api exec -- tsc && pnpm --filter @new-partner/web build",
+    "build": "pnpm --filter @new-partner/api build && pnpm --filter @new-partner/web build",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm --filter @new-partner/api test"
   },
