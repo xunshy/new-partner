@@ -4,7 +4,7 @@ module.exports = async function handler(request, response) {
   try {
     if (!cachedHandler) {
       const { handle } = require('@hono/node-server/vercel');
-      const appModule = await import('./dist/src/app.js');
+      const appModule = await import('../apps/api/dist/app.js');
       const { createApp } = appModule;
       const { app } = await createApp();
       cachedHandler = handle(app);

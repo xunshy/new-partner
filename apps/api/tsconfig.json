@@ -2,11 +2,13 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "module": "ES2022",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "outDir": "dist",
     "types": ["node"],
     "target": "ES2022",
     "skipLibCheck": true,
+    "noImplicitAny": false,
+    "noEmit": false,
     "declaration": true
   },
   "include": ["src"]
