@@ -1,10 +1,9 @@
-import type { Client, Transaction } from '@libsql/client';
+import type { Client } from '@libsql/client';
 import { mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 export type DatabaseClient = Client;
-export type DatabaseTransaction = Transaction;
 
 export async function openDatabase(path?: string): Promise<DatabaseClient> {
   const configuredRemote = !path ? process.env.TURSO_DATABASE_URL : undefined;
@@ -30,11 +29,4 @@ export async function openDatabase(path?: string): Promise<DatabaseClient> {
     ...['SSR', 'SR', 'R'].map(rarity => ({ sql: "INSERT OR IGNORE INTO generation_counts (rarity, count) SELECT ?, COUNT(*) FROM partners WHERE json_extract(data, '$.rarity') = ?", args: [rarity, rarity] })),
   ], 'write');
   return db;
-}
-
-export async function write<T>(db: DatabaseClient, operation: (tx: DatabaseTransaction) => Promise<T>): Promise<T> {
-  const tx = await db.transaction('write');
-  try { const result = await operation(tx); await tx.commit(); return result; }
-  catch (error) { await tx.rollback(); throw error; }
-  finally { tx.close(); }
 }
