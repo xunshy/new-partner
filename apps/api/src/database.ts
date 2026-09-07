@@ -7,7 +7,12 @@ export type DatabaseClient = Client;
 export type DatabaseTransaction = Transaction;
 
 export async function openDatabase(path?: string): Promise<DatabaseClient> {
-  const remote = !path && process.env.TURSO_DATABASE_URL;
+  const configuredRemote = !path ? process.env.TURSO_DATABASE_URL : undefined;
+  const remote = configuredRemote
+    ?.trim()
+    .replace(/^TURSO_DATABASE_URL\s*=\s*/i, '')
+    .replace(/^(['"])(.*)\1$/, '$2')
+    .trim();
   if (process.env.VERCEL && !remote) throw new Error('TURSO_DATABASE_URL is required on Vercel');
   if (remote && !remote.startsWith('libsql://') && !remote.startsWith('https://')) throw new Error('Use a persistent remote Turso URL');
   const local = path || process.env.DATABASE_PATH || './data/partners.db';
