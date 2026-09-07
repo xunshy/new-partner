@@ -6,6 +6,12 @@ let cachedHandler: ((req: IncomingMessage, res: ServerResponse) => void) | undef
 
 export default async function handler(request: IncomingMessage, response: ServerResponse) {
   try {
+    const vercelRequest = request as IncomingMessage & { body?: unknown; rawBody?: Buffer };
+    if (!vercelRequest.rawBody && vercelRequest.body !== undefined) {
+      vercelRequest.rawBody = Buffer.isBuffer(vercelRequest.body)
+        ? vercelRequest.body
+        : Buffer.from(typeof vercelRequest.body === 'string' ? vercelRequest.body : JSON.stringify(vercelRequest.body));
+    }
     if (!cachedHandler) {
       const { app } = await createApp();
       cachedHandler = handle(app);
