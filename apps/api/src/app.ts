@@ -1,10 +1,9 @@
 import { Hono } from 'hono';
 import { getCookie, setCookie } from 'hono/cookie';
 import { randomUUID } from 'node:crypto';
-import type { Client, Transaction } from '@libsql/client';
 import { COOLDOWN_MS, rarityRates, createPartnerSchema, interactSchema, renameSchema, type Partner, type PartnerEvent } from '@new-partner/shared';
 import { generateInteraction, generatePartner } from './generator.js';
-import { openDatabase, write } from './database.js';
+import { openDatabase, write, type DatabaseClient, type DatabaseTransaction } from './database.js';
 
 export async function createApp(databasePath?: string) {
   const db = await openDatabase(databasePath);
@@ -32,11 +31,11 @@ export async function createApp(databasePath?: string) {
     console.error(error);
     return c.json({ error: '心动信号暂时中断，请稍后再试' }, 500);
   });
-  const read = async (connection: Client | Transaction, id: string, owner: string): Promise<Partner | null> => {
+  const read = async (connection: DatabaseClient | DatabaseTransaction, id: string, owner: string): Promise<Partner | null> => {
     const { rows } = await connection.execute({ sql: 'SELECT data FROM partners WHERE id = ? AND owner = ?', args: [id, owner] });
     return rows[0] ? JSON.parse(String(rows[0].data)) : null;
   };
-  const update = (connection: Client | Transaction, partner: Partner) => connection.execute({ sql: 'UPDATE partners SET data = ? WHERE id = ?', args: [JSON.stringify(partner), partner.id] });
+  const update = (connection: DatabaseClient | DatabaseTransaction, partner: Partner) => connection.execute({ sql: 'UPDATE partners SET data = ? WHERE id = ?', args: [JSON.stringify(partner), partner.id] });
   app.get('/api/health', c => c.json({ status: 'ok' }));
   app.get('/api/stats', async c => {
     const { rows } = await db.execute('SELECT rarity, count FROM generation_counts');

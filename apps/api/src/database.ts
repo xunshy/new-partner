@@ -1,9 +1,12 @@
-import { createClient, type Client, type Transaction } from '@libsql/client';
+import { createClient } from '@libsql/client';
 import { mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-export async function openDatabase(path?: string): Promise<Client> {
+export type DatabaseClient = ReturnType<typeof createClient>;
+export type DatabaseTransaction = Awaited<ReturnType<DatabaseClient['transaction']>>;
+
+export async function openDatabase(path?: string): Promise<DatabaseClient> {
   const remote = !path && process.env.TURSO_DATABASE_URL;
   if (process.env.VERCEL && !remote) throw new Error('TURSO_DATABASE_URL is required on Vercel');
   if (remote && !remote.startsWith('libsql://') && !remote.startsWith('https://')) throw new Error('Use a persistent remote Turso URL');
@@ -22,7 +25,7 @@ export async function openDatabase(path?: string): Promise<Client> {
   return db;
 }
 
-export async function write<T>(db: Client, operation: (tx: Transaction) => Promise<T>): Promise<T> {
+export async function write<T>(db: DatabaseClient, operation: (tx: DatabaseTransaction) => Promise<T>): Promise<T> {
   const tx = await db.transaction('write');
   try { const result = await operation(tx); await tx.commit(); return result; }
   catch (error) { await tx.rollback(); throw error; }
